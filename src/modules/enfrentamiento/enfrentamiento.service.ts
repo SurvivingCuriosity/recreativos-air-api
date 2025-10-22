@@ -100,12 +100,8 @@ export const EnfrentamientoService = {
     if (!pertenece)
       throw new ApiError(403, "No puedes rechazar este resultado");
 
-    enf.partidos = enf.partidos.map(() => ({ golesA: 0, golesB: 0 })) as any;
-    enf.resultadoPropuestoPor = undefined;
-    enf.resultadoAceptadoPor = undefined;
     enf.resultadoRechazadoPor = idEquipo as any;
-    enf.estado = EstadoEnfrentamiento.SinJugar;
-    enf.fecha = null;
+    enf.estado = EstadoEnfrentamiento.ConfirmarResultado;
 
     await EnfrentamientoRepository.save(enf);
     return (await EnfrentamientoRepository.findById(enf._id))!;
@@ -119,6 +115,22 @@ export const EnfrentamientoService = {
 
     enf.estado = EstadoEnfrentamiento.Jugado;
     enf.fecha = new Date();
+
+    await EnfrentamientoRepository.save(enf);
+    return (await EnfrentamientoRepository.findById(enf._id))!;
+  },
+  async rechazarResultadoAdmin(
+    enfrentamientoId: ObjectIdLike
+  ): Promise<Enfrentamiento> {
+    const enf = await EnfrentamientoRepository.findById(enfrentamientoId);
+    if (!enf) throw new ApiError(404, "Enfrentamiento no encontrado");
+
+    enf.partidos = enf.partidos.map(() => ({ golesA: 0, golesB: 0 })) as any;
+    enf.resultadoPropuestoPor = undefined;
+    enf.resultadoAceptadoPor = undefined;
+    enf.resultadoRechazadoPor = undefined;
+    enf.estado = EstadoEnfrentamiento.SinJugar;
+    enf.fecha = null;
 
     await EnfrentamientoRepository.save(enf);
     return (await EnfrentamientoRepository.findById(enf._id))!;

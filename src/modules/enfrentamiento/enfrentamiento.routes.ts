@@ -4,7 +4,12 @@ import { validate } from "@/middleware/validate";
 import { validateParams } from "@/middleware/validateParam";
 import { Router } from "express";
 import { EnfrentamientoController } from "./enfrentamiento.controller";
-import { AceptarRechazarResultadoSchema, EnfrentamientoIdParamSchema, GetEnfrentamientosLigaParamsSchema, ProponerResultadoSchema } from "recreativos-air-core/enfrentamiento";
+import {
+  AceptarRechazarResultadoSchema,
+  EnfrentamientoIdParamSchema,
+  GetEnfrentamientosLigaParamsSchema,
+  ProponerResultadoSchema,
+} from "recreativos-air-core/enfrentamiento";
 
 const router = Router();
 
@@ -41,15 +46,23 @@ router.post(
 router.post(
   "/:id/rechazar",
   requireAuth,
-  validateParams(AceptarRechazarResultadoSchema),
+  validateParams(EnfrentamientoIdParamSchema),
+  validate(AceptarRechazarResultadoSchema),
   responseHandler(EnfrentamientoController.rechazarResultado)
 );
 
 router.post(
-  "/:id/confirmar",
+  "/:id/confirmar-admin",
   requireAdmin,
   validateParams(EnfrentamientoIdParamSchema),
   responseHandler(EnfrentamientoController.confirmarResultadoAdmin)
+);
+
+router.post(
+  "/:id/rechazar-admin",
+  requireAdmin,
+  validateParams(EnfrentamientoIdParamSchema),
+  responseHandler(EnfrentamientoController.rechazarResultadoAdmin)
 );
 
 export default router;

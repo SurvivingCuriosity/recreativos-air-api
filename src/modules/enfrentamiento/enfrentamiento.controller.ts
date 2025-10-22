@@ -70,4 +70,14 @@ export const EnfrentamientoController = {
     );
     return ok(EnfrentamientoAdapter.toDTO(enf), "Resultado confirmado por admin");
   },
+
+  rechazarResultadoAdmin: async (
+    req: ValidatedRequest<EnfrentamientoIDParam>
+  ) => {
+    const { id: enfrentamientoId } = req.validatedParams!;
+    const enf = await EnfrentamientoService.rechazarResultadoAdmin(
+      enfrentamientoId
+    );
+    return ok(EnfrentamientoAdapter.toDTO(enf), "Resultado confirmado por admin");
+  },
 };
