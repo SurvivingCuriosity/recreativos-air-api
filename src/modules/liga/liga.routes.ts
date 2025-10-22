@@ -1,9 +1,4 @@
 import { Router } from "express";
-import { requireAdmin, requireAuth } from "../../middleware/auth";
-import { responseHandler } from "../../middleware/responseHandler";
-import { validate } from "../../middleware/validate";
-import { validateParams } from "../../middleware/validateParam";
-import { LigaController } from "./liga.controller";
 import {
   AprobarInscripcionParamsSchema,
   AprobarInscripcionSchema,
@@ -17,6 +12,11 @@ import {
   InscribirEquipoSchema,
   MarcarPagadoParamsSchema,
 } from "recreativos-air-core/liga";
+import { requireAdmin, requireAuth } from "../../middleware/auth";
+import { responseHandler } from "../../middleware/responseHandler";
+import { validate } from "../../middleware/validate";
+import { validateParams } from "../../middleware/validateParam";
+import { LigaController } from "./liga.controller";
 
 const router = Router();
 
@@ -27,7 +27,7 @@ router.post(
   responseHandler(LigaController.crearLiga)
 );
 
-router.get("/", requireAuth, responseHandler(LigaController.obtenerLigas));
+router.get("/", responseHandler(LigaController.obtenerLigas));
 
 router.get(
   "/:id",
