@@ -9,6 +9,10 @@ import {
 import { UserService } from "./user.service";
 
 export const UserController = {
+  getAllUsers: async () => {
+    const users = await UserService.getAllUsers();
+    return ok(UserAdapter.toDtoList(users), "Usuarios obtenidos");
+  },
   getUserById: async (req: ValidatedRequest<GetUserByIdParams>) => {
     const user = await UserService.getById(req.params.id);
     return ok(UserAdapter.toDto(user), "Perfil obtenido correctamente");

@@ -3,6 +3,10 @@ import { User } from "./user.model";
 import { UserRepository } from "./user.repository";
 
 export const UserService = {
+  getAllUsers: async () => {
+    const users = await UserRepository.findAll();
+    return users;
+  },
   getById: async (id: string) => {
     const user = await UserRepository.findById(id);
     if (!user) throw new ApiError(404, "Usuario no encontrado");

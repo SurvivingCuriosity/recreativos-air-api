@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { requireAuth } from "../../middleware/auth";
+import { requireAdmin, requireAuth } from "../../middleware/auth";
 import { responseHandler } from "../../middleware/responseHandler";
 import { validate } from "../../middleware/validate";
 import { validateParams } from "../../middleware/validateParam";
@@ -7,6 +7,13 @@ import { EquipoController } from "./equipo.controller";
 import { CrearEquipoSchema, GetEquiposDeUsuarioParamsSchema, InvitacionEquipoSchema } from "recreativos-air-core/equipos";
 
 const router = Router();
+
+
+router.get(
+  "/",
+  requireAdmin,
+  responseHandler(EquipoController.getAllEquipos)
+);
 
 router.post(
   "/",

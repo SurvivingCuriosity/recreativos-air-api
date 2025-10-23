@@ -1,6 +1,11 @@
 import { User, UserModel } from "./user.model";
 
 export const UserRepository = {
+
+  findAll: async () => {
+    return UserModel.find().lean<User[]>();
+  },
+
   findById: async (id: string) => {
     return UserModel.findById(id).lean<User | null>();
   },

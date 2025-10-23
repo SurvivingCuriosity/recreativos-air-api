@@ -5,6 +5,12 @@ import { EquipoService } from "./equipo.service";
 import { CrearEquipoBody, GetEquiposDeUsuarioParams, InvitacionEquipoBody } from "recreativos-air-core/equipos";
 
 export const EquipoController = {
+
+  getAllEquipos: async () => {
+    const equipos = await EquipoService.getAllEquipos();
+    return ok(EquipoAdapter.toDTOList(equipos), "Equipos obtenidos");
+  },
+
   crearEquipo: async (req: ValidatedRequest<any, CrearEquipoBody>) => {
     const idCreador = req.user!.id;
     const equipo = await EquipoService.crearEquipo({

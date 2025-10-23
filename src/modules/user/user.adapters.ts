@@ -4,6 +4,8 @@ export const UserAdapter = {
   toDto(user: any): UserDTO {
     if (!user) throw new Error("UserAdapter.toDto: user is null or undefined");
 
+    console.log(user)
+
     return {
       id: user._id?.toString(),
       username: user.username,

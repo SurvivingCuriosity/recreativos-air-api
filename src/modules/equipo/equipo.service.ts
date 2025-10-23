@@ -17,6 +17,12 @@ interface CrearEquipoDTO {
 }
 
 export const EquipoService = {
+
+  getAllEquipos: async () => {
+    const equipos = await EquipoRepository.findAll();
+    return equipos;
+  },
+
   crearEquipo: async (data: CrearEquipoDTO) => {
     const { nombre, color, jugadores, creadorId, creadorEsAdmin } = data;
 
@@ -53,7 +59,7 @@ export const EquipoService = {
 
     if (!creadorEsAdmin && creadorId && !yaIncluyeCreador) {
       jugadoresProcesados.push({
-        nombre: "Creador",
+        nombre: "Admin",
         idUsuario: new Types.ObjectId(creadorId),
         estado: EstadoJugadorEnEquipo.ACEPTADO,
         suplente: false,
