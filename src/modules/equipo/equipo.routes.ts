@@ -8,7 +8,6 @@ import { CrearEquipoSchema, GetEquiposDeUsuarioParamsSchema, InvitacionEquipoSch
 
 const router = Router();
 
-
 router.get(
   "/",
   requireAdmin,

@@ -7,7 +7,7 @@ export const requireAuth = async (
   _res: Response,
   next: NextFunction
 ) => {
-  console.log('req auth')
+
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith("Bearer ")) {
     throw new ApiError(401, "Token no proporcionado");

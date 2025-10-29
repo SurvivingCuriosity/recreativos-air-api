@@ -67,6 +67,13 @@ router.patch(
   responseHandler(LigaController.marcarPagado)
 );
 
+router.delete(
+  "/:id/equipo/:equipoId",
+  requireAdmin,
+  validateParams(AprobarInscripcionParamsSchema),
+  responseHandler(LigaController.eliminarEquipoDeLiga)
+);
+
 router.get(
   "/:id/equipos",
   requireAuth,

@@ -1,10 +1,10 @@
 import { ObjectIdLike } from "@/types/types";
+import { EstadoEnfrentamiento } from "recreativos-air-core/enfrentamiento";
 import {
   EnfrentamientoDoc,
   EnfrentamientoDocConEquipos,
   EnfrentamientoModel,
 } from "./enfrentamiento.model";
-import { EstadoEnfrentamiento } from "recreativos-air-core/enfrentamiento";
 
 type EnfrentamientoCreate = Omit<
   EnfrentamientoDoc,
@@ -13,7 +13,6 @@ type EnfrentamientoCreate = Omit<
 type EnfrentamientoUpdate = Partial<EnfrentamientoDoc>;
 
 export const EnfrentamientoRepository = {
-  
   async findByLiga(ligaId: string) {
     return EnfrentamientoModel.find({ liga: ligaId })
       .populate("equipoA")
@@ -51,10 +50,16 @@ export const EnfrentamientoRepository = {
     return EnfrentamientoModel.findByIdAndDelete(id).exec();
   },
 
+  async deleteByLigaAndEquipo(ligaId: ObjectIdLike, equipoId: ObjectIdLike) {
+    return EnfrentamientoModel.deleteMany({
+      liga: ligaId,
+      $or: [{ equipoA: equipoId }, { equipoB: equipoId }],
+    });
+  },
+
   async findJugadosPorLiga(
     ligaId: ObjectIdLike
   ): Promise<EnfrentamientoDocConEquipos[]> {
-
     return (await EnfrentamientoModel.find({
       liga: ligaId,
       estado: EstadoEnfrentamiento.Jugado,

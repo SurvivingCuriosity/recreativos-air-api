@@ -6,7 +6,11 @@ import { EnfrentamientoRepository } from "../enfrentamiento/enfrentamiento.repos
 import { EquipoRepository } from "../equipo/equipo.repository";
 import { LigaClasificacionHelper } from "./liga.clasificacion";
 import { LigaRepository } from "./liga.repository";
-import { CrearLigaBody, EstadoEquipoEnLiga, EstadoLiga } from "recreativos-air-core/liga";
+import {
+  CrearLigaBody,
+  EstadoEquipoEnLiga,
+  EstadoLiga,
+} from "recreativos-air-core/liga";
 
 export const LigaService = {
   crearLiga: async (data: CrearLigaBody, adminId: ObjectIdLike) => {
@@ -97,12 +101,53 @@ export const LigaService = {
     return liga;
   },
 
+  eliminarEquipoDeLiga: async (
+    ligaId: ObjectIdLike,
+    equipoId: ObjectIdLike
+  ) => {
+    const liga = await LigaRepository.findById(ligaId);
+    if (!liga) throw new ApiError(404, "Liga no encontrada");
+
+    // 📌 Verificar si el equipo está inscrito
+    const equipoEnLiga = liga.equipos.find((e) => {
+      const id =
+        e.equipo instanceof Types.ObjectId
+          ? e.equipo.toString()
+          : e.equipo._id?.toString();
+      return id === equipoId.toString();
+    });
+
+    if (!equipoEnLiga)
+      throw new ApiError(404, "El equipo no está inscrito en esta liga");
+
+    // 🗑️ Eliminar enfrentamientos relacionados con el equipo
+    await EnfrentamientoRepository.deleteByLigaAndEquipo(ligaId, equipoId);
+
+    // 🧹 Filtrar el equipo fuera de la liga
+    liga.equipos = liga.equipos.filter((e) => {
+      const id =
+        e.equipo instanceof Types.ObjectId
+          ? e.equipo.toString()
+          : e.equipo._id?.toString();
+      return id !== equipoId.toString();
+    });
+
+    await liga.save();
+
+    return liga;
+  },
+
   cambiarEstado: async (ligaId: ObjectIdLike, nuevoEstado: EstadoLiga) => {
     const liga = await LigaRepository.findById(ligaId);
     if (!liga) throw new ApiError(404, "Liga no encontrada");
 
     liga.estadoLiga = nuevoEstado;
     await liga.save();
+
+    if (nuevoEstado === EstadoLiga.EnCurso) {
+      await EnfrentamientoGenerator.generarAlArrancarLiga(liga);
+    }
+
     return liga;
   },
 

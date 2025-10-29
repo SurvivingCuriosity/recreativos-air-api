@@ -1,4 +1,4 @@
-import { LigaAdapter } from './liga.adapters';
+import { LigaAdapter } from "./liga.adapters";
 import { ValidatedRequest } from "@/types/types";
 import { ok } from "@/utils/ApiResponse";
 import type {
@@ -15,7 +15,7 @@ import type {
   MarcarPagadoParams,
 } from "recreativos-air-core/liga";
 import { LigaService } from "./liga.service";
-import { EquipoAdapter } from '../equipo/equipo.adapters';
+import { EquipoAdapter } from "../equipo/equipo.adapters";
 
 export const LigaController = {
   crearLiga: async (req: ValidatedRequest<any, CrearLigaBody>) => {
@@ -41,6 +41,16 @@ export const LigaController = {
       req.validated.equipoId
     );
     return ok(LigaAdapter.toDTO(liga), "Equipo inscrito");
+  },
+
+  eliminarEquipoDeLiga: async (
+    req: ValidatedRequest<AprobarInscripcionParams>
+  ) => {
+    const { id: ligaId, equipoId } = req.params;
+
+    const liga = await LigaService.eliminarEquipoDeLiga(ligaId, equipoId);
+
+    return ok(LigaAdapter.toDTO(liga), "Equipo eliminado correctamente");
   },
 
   aprobarInscripcion: async (
