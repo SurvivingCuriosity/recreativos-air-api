@@ -1,8 +1,14 @@
 import { EquipoDTO, JugadorDTO } from "recreativos-air-core/equipos";
 
 export const EquipoAdapter = {
-  toDTO(equipo: any): EquipoDTO {
-    if (!equipo) throw new Error("EquipoAdapter.toDTO: equipo is null or undefined");
+  toDTO(equipo: any): EquipoDTO|null {
+    if (!equipo) return {
+      id: "",
+      idCreador: "",
+      nombre: "Equipo eliminado",
+      color: "",
+      jugadores: [],
+    }
 
     return {
       id: equipo._id?.toString?.() ?? "",
@@ -18,7 +24,7 @@ export const EquipoAdapter = {
     };
   },
 
-  toDTOList(equipos: any[]): EquipoDTO[] {
+  toDTOList(equipos: any[]): Array<EquipoDTO|null> {
     return equipos.map((e) => this.toDTO(e));
   },
 };
