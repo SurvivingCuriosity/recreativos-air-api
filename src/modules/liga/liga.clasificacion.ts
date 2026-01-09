@@ -71,15 +71,11 @@ export const LigaClasificacionHelper = {
       let index = 0
       for (const p of enf.partidos ?? []) {
         index++
-        console.log('Recorriendo partido: ', index)
-        console.log(p)
-        
+
         if (p.golesA > p.golesB) {
-          console.log(index+ 'Punto para A')
           puntosA += 1;
         }
         else if (p.golesB > p.golesA) {
-          console.log(index+ 'Punto para B')
           puntosB += 1;
         }
 

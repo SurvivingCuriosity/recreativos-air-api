@@ -24,7 +24,6 @@ export const UserRepository = {
     q: string,
     limit = 10
   ): Promise<(User & { _id: string })[]> => {
-    console.log('WEn el repo')
     const regex = new RegExp(q, "i");
     const users = await UserModel.find({
       $or: [{ username: regex }, { nombre: regex }],

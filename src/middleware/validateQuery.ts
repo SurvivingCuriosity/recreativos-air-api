@@ -4,7 +4,6 @@ import { ZodType } from "zod";
 
 export const validateQuery =
   (schema: ZodType) => (req: Request, _res: Response, next: NextFunction) => {
-    console.log('validating query')
     const parsed = schema.safeParse(req.query);
     if (!parsed.success) {
       throw new ApiError(

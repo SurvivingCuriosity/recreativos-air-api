@@ -34,19 +34,14 @@ export const EnfrentamientoService = {
     equipoId,
     partidos,
   }: ProponerResultadoInput): Promise<Enfrentamiento> {
-    console.log("idEnfrentamiento: ", enfrentamientoId);
     const enf = await EnfrentamientoRepository.findById(enfrentamientoId);
-    console.log("enf: ", enf);
     if (!enf) throw new ApiError(404, "Enfrentamiento no encontrado");
 
     const idEquipo = new Types.ObjectId(equipoId);
-    console.log("idEquipo: ", idEquipo);
 
     const pertenece =
       idEquipo.equals(getEquipoId(enf.equipoA as Types.ObjectId)) ||
       idEquipo.equals(getEquipoId(enf.equipoB as Types.ObjectId));
-
-    console.log("Pertenece: ", pertenece);
 
     if (!pertenece)
       throw new ApiError(403, "No puedes proponer este resultado");

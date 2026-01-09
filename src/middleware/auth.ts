@@ -13,7 +13,7 @@ export const requireAuth = async (
     throw new ApiError(401, "Token no proporcionado");
   }
   const token = authHeader.split(" ")[1];
-  
+
   try {
     const payload = await verifyToken(token);
     req.user = { id: payload.id, admin: payload.admin };
@@ -37,7 +37,6 @@ export const requireAdmin = async (
 
   try {
     const payload = await verifyToken(token);
-    console.log(payload)
     if (payload.admin !== true)
       throw new ApiError(403, "Acceso denegado: no eres administrador");
 
