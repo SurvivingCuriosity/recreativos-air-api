@@ -14,6 +14,12 @@ import {
 const router = Router();
 
 router.get(
+  "/pendientes-admin",
+  requireAdmin,
+  responseHandler(EnfrentamientoController.obtenerPendientesAdmin)
+);
+
+router.get(
   "/liga/:ligaId",
   requireAuth,
   validateParams(GetEnfrentamientosLigaParamsSchema),

@@ -12,6 +12,11 @@ export const EnfrentamientoController = {
     return ok(EnfrentamientoAdapter.toDTOList(enfrentamientos), "Enfrentamientos obtenidos");
   },
 
+  obtenerPendientesAdmin: async (_req: ValidatedRequest) => {
+    const enfrentamientos = await EnfrentamientoService.obtenerPendientesAdmin();
+    return ok(EnfrentamientoAdapter.toDTOList(enfrentamientos), "Enfrentamientos pendientes obtenidos");
+  },
+
   getEnfrentamiento: async (req: ValidatedRequest<EnfrentamientoIDParam>) => {
     const { id:idEnfrentamiento } = req.params;
     const enfrentamiento = await EnfrentamientoService.obtenerEnfrentamiento(idEnfrentamiento);

@@ -23,6 +23,10 @@ export const EnfrentamientoService = {
     return await EnfrentamientoRepository.findByLiga(ligaId.toString());
   },
 
+  async obtenerPendientesAdmin(): Promise<Enfrentamiento[]> {
+    return await EnfrentamientoRepository.findPendientesAdmin();
+  },
+
   async obtenerEnfrentamiento(
     idEnfrentamiento: ObjectIdLike
   ): Promise<Enfrentamiento | null> {

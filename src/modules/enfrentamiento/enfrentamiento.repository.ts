@@ -68,4 +68,13 @@ export const EnfrentamientoRepository = {
       .populate("equipoB")
       .exec()) as unknown as EnfrentamientoDocConEquipos[];
   },
+
+  async findPendientesAdmin(): Promise<EnfrentamientoDocConEquipos[]> {
+    return (await EnfrentamientoModel.find({
+      estado: EstadoEnfrentamiento.ConfirmarResultado,
+    })
+      .populate("equipoA")
+      .populate("equipoB")
+      .exec()) as unknown as EnfrentamientoDocConEquipos[];
+  },
 };
