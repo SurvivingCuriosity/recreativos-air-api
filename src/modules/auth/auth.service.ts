@@ -1,4 +1,4 @@
-import { sendVerifyEmail } from "@/infra/mailservice";
+import { sendPasswordResetEmail, sendVerifyEmail } from "@/infra/mailservice";
 import bcrypt from "bcryptjs";
 import { ApiError } from "../../utils/ApiError";
 import { AuthRepository } from "./auth.repository";
@@ -84,5 +84,32 @@ export const AuthService = {
     const user = await AuthRepository.findById(userId);
     if (!user) throw new ApiError(404, "Usuario no encontrado");
     return user
+  },
+
+  forgotPassword: async (data: { email: string }) => {
+    const user = await AuthRepository.findByEmail(data.email);
+    // Respuesta siempre exitosa: no revelamos si el email existe
+    if (!user || !user.verified) return null;
+
+    const code = generateOTP();
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+    await AuthRepository.savePasswordReset(data.email, code, expiresAt);
+    await sendPasswordResetEmail(data.email, code);
+    return null;
+  },
+
+  resetPassword: async (data: { email: string; code: string; password: string }) => {
+    const record = await AuthRepository.findPasswordReset(data.email, data.code);
+    if (!record) throw new ApiError(400, "Código inválido o inexistente");
+
+    if (record.expiresAt < new Date()) {
+      await AuthRepository.deletePasswordReset(data.email);
+      throw new ApiError(400, "El código ha expirado");
+    }
+
+    const hashed = await bcrypt.hash(data.password, 10);
+    await AuthRepository.updatePassword(data.email, hashed);
+    await AuthRepository.deletePasswordReset(data.email);
+    return null;
   },
 };

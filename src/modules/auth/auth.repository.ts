@@ -1,5 +1,6 @@
 import { UserModel } from "../user/user.model";
 import { VerificationModel } from "./auth.model";
+import { PasswordResetModel } from "./passwordReset.model";
 
 export const AuthRepository = {
   findById: async (id: string) => {
@@ -33,5 +34,22 @@ export const AuthRepository = {
 
   deleteVerification: async (email: string) => {
     await VerificationModel.deleteMany({ email });
+  },
+
+  savePasswordReset: async (email: string, code: string, expiresAt: Date) => {
+    await PasswordResetModel.deleteMany({ email });
+    return await PasswordResetModel.create({ email, code, expiresAt });
+  },
+
+  findPasswordReset: async (email: string, code: string) => {
+    return await PasswordResetModel.findOne({ email, code });
+  },
+
+  deletePasswordReset: async (email: string) => {
+    await PasswordResetModel.deleteMany({ email });
+  },
+
+  updatePassword: async (email: string, hashedPassword: string) => {
+    return await UserModel.updateOne({ email }, { password: hashedPassword });
   },
 };

@@ -18,3 +18,14 @@ export async function sendVerifyEmail(to:string, code:string) {
   return info.messageId;
 }
 
+export async function sendPasswordResetEmail(to: string, code: string) {
+  const info = await transporter.sendMail({
+    from: `${process.env.APP_NAME} <${process.env.FROM_EMAIL}>`,
+    to,
+    subject: "Recupera tu contraseña",
+    text: `Tu código de recuperación es: ${code}. Expira en 30 minutos.`,
+    html: `<p>Tu código de recuperación es: <b>${code}</b></p><p>Expira en 30 minutos.</p>`,
+  });
+  return info.messageId;
+}
+

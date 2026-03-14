@@ -1,9 +1,11 @@
 import { ValidatedRequest } from "@/types/types";
 import { ok } from "@/utils/ApiResponse";
 import {
+  ForgotPasswordBody,
   LoginBody,
   RegisterBody,
   ResendCodeBody,
+  ResetPasswordBody,
   VerifyEmailBody,
 } from "recreativos-air-core/auth";
 import { UserAdapter } from "./../user/user.adapters";
@@ -34,5 +36,15 @@ export const AuthController = {
   resendCode: async (req: ValidatedRequest<any, ResendCodeBody>) => {
     const res = await AuthService.resendCode(req.validated);
     return ok(res, "Código enviado");
+  },
+
+  forgotPassword: async (req: ValidatedRequest<any, ForgotPasswordBody>) => {
+    await AuthService.forgotPassword(req.validated);
+    return ok(null, "Si el correo existe, recibirás un código de recuperación");
+  },
+
+  resetPassword: async (req: ValidatedRequest<any, ResetPasswordBody>) => {
+    await AuthService.resetPassword(req.validated);
+    return ok(null, "Contraseña actualizada correctamente");
   },
 };

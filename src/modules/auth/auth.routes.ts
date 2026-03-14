@@ -3,7 +3,7 @@ import { Router } from "express";
 import { requireAuth } from "../../middleware/auth";
 import { validate } from "../../middleware/validate";
 import { AuthController } from "./auth.controller";
-import { LoginSchema, RegisterSchema, ResendCodeSchema, VerifyEmailSchema } from "recreativos-air-core/auth";
+import { ForgotPasswordSchema, LoginSchema, RegisterSchema, ResendCodeSchema, ResetPasswordSchema, VerifyEmailSchema } from "recreativos-air-core/auth";
 
 const router = Router();
 
@@ -31,6 +31,18 @@ router.post(
   "/resend-code",
   validate(ResendCodeSchema),
   responseHandler(AuthController.resendCode)
+);
+
+router.post(
+  "/forgot-password",
+  validate(ForgotPasswordSchema),
+  responseHandler(AuthController.forgotPassword)
+);
+
+router.post(
+  "/reset-password",
+  validate(ResetPasswordSchema),
+  responseHandler(AuthController.resetPassword)
 );
 
 export default router;
