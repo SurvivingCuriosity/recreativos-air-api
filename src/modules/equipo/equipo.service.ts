@@ -3,12 +3,13 @@ import { ApiError } from "../../utils/ApiError";
 import { EquipoRepository } from "./equipo.repository";
 import { EstadoJugadorEnEquipo } from "recreativos-air-core/equipos";
 import { EquipoDoc } from "./equipo.model";
+import { UserRepository } from "../user/user.repository";
 
 interface CrearEquipoDTO {
   nombre: string;
   color?: string;
   jugadores: {
-    nombre: string;
+    nombre?: string;
     idUsuario?: string | null;
     suplente?: boolean;
   }[];
@@ -34,13 +35,21 @@ export const EquipoService = {
       throw new ApiError(409, "Ya existe un equipo con ese nombre");
     }
 
-    // 🧩 Normalizar jugadores
-    const jugadoresProcesados = jugadores.map((j) => {
+    // Los jugadores con cuenta toman el nombre de su usuario (o el username si no tiene)
+    const jugadoresProcesados = await Promise.all(
+      jugadores.map(async (j) => {
       const esSinCuenta = !j.idUsuario;
       const esCreador = creadorId && j.idUsuario === creadorId;
 
+      let nombreJugador = j.nombre?.trim() ?? "";
+      if (j.idUsuario) {
+        const usuario = await UserRepository.findById(j.idUsuario);
+        if (!usuario) throw new ApiError(404, "Usuario no encontrado");
+        nombreJugador = usuario.nombre?.trim() || usuario.username;
+      }
+
       return {
-        nombre: j.nombre.trim(),
+        nombre: nombreJugador,
         idUsuario: j.idUsuario ? new Types.ObjectId(j.idUsuario) : null,
         estado:
           esSinCuenta || esCreador
@@ -48,7 +57,8 @@ export const EquipoService = {
             : EstadoJugadorEnEquipo.PENDIENTE,
         suplente: j.suplente ?? false,
       };
-    });
+      })
+    );
 
     // 👤 Añadir el creador si no está en la lista
     const yaIncluyeCreador =

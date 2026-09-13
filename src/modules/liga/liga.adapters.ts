@@ -31,6 +31,7 @@ export const LigaAdapter = {
       configuracion,
       equipos,
       createdBy: this.parseId(liga.createdBy),
+      temporada: liga.temporada ? this.parseId(liga.temporada) : null,
     };
   },
 

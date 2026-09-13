@@ -50,6 +50,10 @@ export const EnfrentamientoRepository = {
     return EnfrentamientoModel.findByIdAndDelete(id).exec();
   },
 
+  async deleteByLiga(ligaId: ObjectIdLike) {
+    return EnfrentamientoModel.deleteMany({ liga: ligaId });
+  },
+
   async deleteByLigaAndEquipo(ligaId: ObjectIdLike, equipoId: ObjectIdLike) {
     return EnfrentamientoModel.deleteMany({
       liga: ligaId,

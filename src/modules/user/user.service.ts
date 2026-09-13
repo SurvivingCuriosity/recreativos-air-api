@@ -20,6 +20,12 @@ export const UserService = {
   },
 
   updateUser: async (id: string, data: Partial<User>) => {
+    if (data.username) {
+      const existente = await UserRepository.findByUsername(data.username);
+      if (existente && existente._id.toString() !== id)
+        throw new ApiError(409, "El nombre de usuario ya está en uso");
+    }
+
     const updated = await UserRepository.update(id, data);
     if (!updated) throw new ApiError(404, "No se pudo actualizar el usuario");
     return updated;

@@ -1,13 +1,17 @@
 import { Router } from "express";
 import {
+  ActualizarLigaParamsSchema,
+  ActualizarLigaSchema,
   AprobarInscripcionParamsSchema,
   AprobarInscripcionSchema,
   CambiarEstadoLigaParamsSchema,
   CambiarEstadoLigaSchema,
   CrearLigaSchema,
+  EliminarLigaParamsSchema,
   GetClasificacionParamsSchema,
   GetEquiposLigaParamsSchema,
   GetLigaParamsSchema,
+  GetLigasQuerySchema,
   InscribirEquipoParamsSchema,
   InscribirEquipoSchema,
   MarcarPagadoParamsSchema,
@@ -16,6 +20,7 @@ import { requireAdmin, requireAuth } from "../../middleware/auth";
 import { responseHandler } from "../../middleware/responseHandler";
 import { validate } from "../../middleware/validate";
 import { validateParams } from "../../middleware/validateParam";
+import { validateQuery } from "../../middleware/validateQuery";
 import { LigaController } from "./liga.controller";
 
 const router = Router();
@@ -27,13 +32,32 @@ router.post(
   responseHandler(LigaController.crearLiga)
 );
 
-router.get("/", responseHandler(LigaController.obtenerLigas));
+router.get(
+  "/",
+  validateQuery(GetLigasQuerySchema),
+  responseHandler(LigaController.obtenerLigas)
+);
 
 router.get(
   "/:id",
   requireAuth,
   validateParams(GetLigaParamsSchema),
   responseHandler(LigaController.obtenerLiga)
+);
+
+router.put(
+  "/:id",
+  requireAdmin,
+  validateParams(ActualizarLigaParamsSchema),
+  validate(ActualizarLigaSchema),
+  responseHandler(LigaController.actualizarLiga)
+);
+
+router.delete(
+  "/:id",
+  requireAdmin,
+  validateParams(EliminarLigaParamsSchema),
+  responseHandler(LigaController.eliminarLiga)
 );
 
 router.post(

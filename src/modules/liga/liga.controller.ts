@@ -2,14 +2,18 @@ import { LigaAdapter } from "./liga.adapters";
 import { ValidatedRequest } from "@/types/types";
 import { ok } from "@/utils/ApiResponse";
 import type {
+  ActualizarLigaBody,
+  ActualizarLigaParams,
   AprobarInscripcionBody,
   AprobarInscripcionParams,
   CambiarEstadoLigaBody,
   CambiarEstadoLigaParams,
   CrearLigaBody,
+  EliminarLigaParams,
   GetClasificacionParams,
   GetEquiposLigaParams,
   GetLigaParams,
+  GetLigasQuery,
   InscribirEquipoBody,
   InscribirEquipoParams,
   MarcarPagadoParams,
@@ -23,9 +27,21 @@ export const LigaController = {
     return ok(LigaAdapter.toDTO(liga), "Liga creada correctamente");
   },
 
-  obtenerLigas: async () => {
-    const ligas = await LigaService.obtenerLigas();
+  obtenerLigas: async (req: ValidatedRequest<any, any, GetLigasQuery>) => {
+    const ligas = await LigaService.obtenerLigas(req.validatedQuery ?? {});
     return ok(LigaAdapter.toDTOList(ligas), "Ligas obtenidas");
+  },
+
+  actualizarLiga: async (
+    req: ValidatedRequest<ActualizarLigaParams, ActualizarLigaBody>
+  ) => {
+    const liga = await LigaService.actualizarLiga(req.params.id, req.validated!);
+    return ok(LigaAdapter.toDTO(liga), "Liga actualizada");
+  },
+
+  eliminarLiga: async (req: ValidatedRequest<EliminarLigaParams>) => {
+    const liga = await LigaService.eliminarLiga(req.params.id);
+    return ok(LigaAdapter.toDTO(liga), "Liga eliminada");
   },
 
   obtenerLiga: async (req: ValidatedRequest<GetLigaParams>) => {

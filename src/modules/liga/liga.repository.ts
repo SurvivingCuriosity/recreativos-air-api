@@ -1,10 +1,14 @@
 import { ObjectIdLike } from "@/types/types";
-import { Types } from "mongoose";
+import { FilterQuery, Types } from "mongoose";
 import { EquipoDoc } from "../equipo/equipo.model";
 import { Liga, LigaDoc, LigaModel } from "./liga.model";
 import { CrearLigaBody } from "recreativos-air-core/liga";
 
-type CrearLigaInput = CrearLigaBody & { equipos: []; createdBy: ObjectIdLike };
+type CrearLigaInput = Omit<CrearLigaBody, "temporada"> & {
+  equipos: [];
+  createdBy: ObjectIdLike;
+  temporada: Types.ObjectId | null;
+};
 
 export type LigaDocConEquipos = Omit<LigaDoc, "equipos"> & {
   equipos: Array<
@@ -17,8 +21,10 @@ export const LigaRepository = {
     return LigaModel.create(data);
   },
 
-  findAll: async (): Promise<LigaDoc[]> => {
-    return LigaModel.find().populate("equipos.equipo").sort({ createdAt: -1 });
+  findAll: async (filter: FilterQuery<Liga> = {}): Promise<LigaDoc[]> => {
+    return LigaModel.find(filter)
+      .populate("equipos.equipo")
+      .sort({ createdAt: -1 });
   },
 
   findById: async (id: ObjectIdLike): Promise<LigaDocConEquipos | null> => {
@@ -52,6 +58,34 @@ export const LigaRepository = {
       ligaId,
       { $push: { equipos: { equipo: new Types.ObjectId(equipoId) } } },
       { new: true }
+    );
+  },
+
+  countByIds: async (ids: ObjectIdLike[]): Promise<number> => {
+    return LigaModel.countDocuments({ _id: { $in: ids } });
+  },
+
+  setTemporada: async (ligaIds: ObjectIdLike[], temporadaId: ObjectIdLike) => {
+    return LigaModel.updateMany(
+      { _id: { $in: ligaIds } },
+      { $set: { temporada: new Types.ObjectId(temporadaId) } }
+    );
+  },
+
+  clearTemporadaExcept: async (
+    temporadaId: ObjectIdLike,
+    ligaIds: ObjectIdLike[]
+  ) => {
+    return LigaModel.updateMany(
+      { temporada: new Types.ObjectId(temporadaId), _id: { $nin: ligaIds } },
+      { $set: { temporada: null } }
+    );
+  },
+
+  clearTemporada: async (temporadaId: ObjectIdLike) => {
+    return LigaModel.updateMany(
+      { temporada: new Types.ObjectId(temporadaId) },
+      { $set: { temporada: null } }
     );
   },
 };

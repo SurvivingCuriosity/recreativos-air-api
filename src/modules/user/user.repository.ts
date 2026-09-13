@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { User, UserModel } from "./user.model";
 
 export const UserRepository = {
@@ -8,6 +9,10 @@ export const UserRepository = {
 
   findById: async (id: string) => {
     return UserModel.findById(id).lean<User | null>();
+  },
+
+  findByUsername: async (username: string) => {
+    return UserModel.findOne({ username }).lean<(User & { _id: Types.ObjectId }) | null>();
   },
 
   findByEmail: async (email: string) => {

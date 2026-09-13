@@ -7,15 +7,26 @@ import { EquipoRepository } from "../equipo/equipo.repository";
 import { LigaClasificacionHelper } from "./liga.clasificacion";
 import { LigaRepository } from "./liga.repository";
 import {
+  ActualizarLigaBody,
   CrearLigaBody,
   EstadoEquipoEnLiga,
   EstadoLiga,
+  GetLigasQuery,
+  SIN_TEMPORADA,
 } from "recreativos-air-core/liga";
+import { TemporadaRepository } from "../temporada/temporada.repository";
 
 export const LigaService = {
   crearLiga: async (data: CrearLigaBody, adminId: ObjectIdLike) => {
     if (!data.nombre || !data.tipoFutbolin || !data.configuracion)
       throw new ApiError(400, "Faltan datos obligatorios");
+
+    if (data.temporada) {
+      if (!Types.ObjectId.isValid(data.temporada))
+        throw new ApiError(400, "ID de temporada inválido");
+      const temporada = await TemporadaRepository.findById(data.temporada);
+      if (!temporada) throw new ApiError(404, "Temporada no encontrada");
+    }
 
     const liga = await LigaRepository.create({
       nombre: data.nombre,
@@ -32,13 +43,62 @@ export const LigaService = {
       },
       equipos: [],
       createdBy: new Types.ObjectId(adminId),
+      temporada: data.temporada ? new Types.ObjectId(data.temporada) : null,
     });
 
     return liga;
   },
 
-  obtenerLigas: async () => {
-    return LigaRepository.findAll();
+  obtenerLigas: async (query: GetLigasQuery) => {
+    if (!query.temporada) return LigaRepository.findAll();
+    if (query.temporada === SIN_TEMPORADA)
+      return LigaRepository.findAll({ temporada: null });
+    if (!Types.ObjectId.isValid(query.temporada))
+      throw new ApiError(400, "ID de temporada inválido");
+
+    return LigaRepository.findAll({
+      temporada: new Types.ObjectId(query.temporada),
+    });
+  },
+
+  actualizarLiga: async (id: ObjectIdLike, data: ActualizarLigaBody) => {
+    const liga = await LigaRepository.findById(id);
+    if (!liga) throw new ApiError(404, "Liga no encontrada");
+
+    if (data.tipoFutbolin !== undefined && liga.estadoLiga !== EstadoLiga.SinEmpezar)
+      throw new ApiError(
+        400,
+        "El tipo de futbolín solo se puede cambiar antes de arrancar la liga"
+      );
+
+    if (data.temporada) {
+      if (!Types.ObjectId.isValid(data.temporada))
+        throw new ApiError(400, "ID de temporada inválido");
+      const temporada = await TemporadaRepository.findById(data.temporada);
+      if (!temporada) throw new ApiError(404, "Temporada no encontrada");
+    }
+
+    if (data.nombre !== undefined) liga.nombre = data.nombre;
+    if (data.descripcion !== undefined) liga.descripcion = data.descripcion;
+    if (data.tipoFutbolin !== undefined) liga.tipoFutbolin = data.tipoFutbolin;
+    if (data.premio !== undefined) liga.premio = data.premio;
+    if (data.normas !== undefined) liga.normas = data.normas;
+    if (data.ubicaciones !== undefined) liga.ubicaciones = data.ubicaciones;
+    if (data.temporada !== undefined)
+      liga.temporada = data.temporada ? new Types.ObjectId(data.temporada) : null;
+
+    await liga.save();
+    return liga;
+  },
+
+  eliminarLiga: async (id: ObjectIdLike) => {
+    const liga = await LigaRepository.findById(id);
+    if (!liga) throw new ApiError(404, "Liga no encontrada");
+
+    await EnfrentamientoRepository.deleteByLiga(id);
+    await LigaRepository.deleteById(id);
+
+    return liga;
   },
 
   obtenerLigaPorId: async (id: ObjectIdLike) => {

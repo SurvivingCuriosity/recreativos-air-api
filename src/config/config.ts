@@ -6,7 +6,7 @@ dotenv.config({
 // SERVER
 export const DEVELOPMENT = process.env.NODE_ENV === "development";
 
-const SERVER_HOSTNAME = process.env.SERVER_HOSTNAME ?? "192.168.0.19";
+const SERVER_HOSTNAME = process.env.SERVER_HOSTNAME ?? "localhost";
 const SERVER_PORT = process.env.PORT
   ? Number(process.env.PORT)
   : 8080;

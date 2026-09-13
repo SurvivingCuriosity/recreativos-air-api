@@ -48,6 +48,7 @@ const LigaSchema = new Schema(
     equipos: { type: [EquipoEnLigaSchema], default: [] },
     enfrentamientos: [{ type: Types.ObjectId, ref: "Enfrentamiento" }],
     createdBy: { type: Types.ObjectId, ref: "User", required: true },
+    temporada: { type: Types.ObjectId, ref: "Temporada", default: null },
   },
   { timestamps: true }
 );
@@ -61,9 +62,10 @@ type EquipoEnLiga = Omit<
 
 export type Liga = Omit<
   InferSchemaType<typeof LigaSchema>,
-  "createdBy" | "equipos" | "enfrentamientos"
+  "createdBy" | "equipos" | "enfrentamientos" | "temporada"
 > & {
   createdBy: Types.ObjectId;
+  temporada: Types.ObjectId | null;
   enfrentamientos: Types.ObjectId[];
   equipos: Array<EquipoEnLiga>;
 };
