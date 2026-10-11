@@ -24,6 +24,15 @@ const EquipoEnLigaSchema = new Schema({
   },
 });
 
+const JornadaSchema = new Schema(
+  {
+    numero: { type: Number, required: true },
+    fechaInicio: { type: Date, default: null },
+    fechaFin: { type: Date, default: null },
+  },
+  { _id: false }
+);
+
 const LigaSchema = new Schema(
   {
     nombre: { type: String, required: true, trim: true },
@@ -49,6 +58,8 @@ const LigaSchema = new Schema(
     enfrentamientos: [{ type: Types.ObjectId, ref: "Enfrentamiento" }],
     createdBy: { type: Types.ObjectId, ref: "User", required: true },
     temporada: { type: Types.ObjectId, ref: "Temporada", default: null },
+    jornadas: { type: [JornadaSchema], default: [] },
+    duracionJornadaDias: { type: Number, default: null },
   },
   { timestamps: true }
 );
@@ -60,14 +71,22 @@ type EquipoEnLiga = Omit<
   equipo: Types.ObjectId | EquipoDoc;
 }
 
+export type Jornada = {
+  numero: number;
+  fechaInicio: Date | null;
+  fechaFin: Date | null;
+};
+
 export type Liga = Omit<
   InferSchemaType<typeof LigaSchema>,
-  "createdBy" | "equipos" | "enfrentamientos" | "temporada"
+  "createdBy" | "equipos" | "enfrentamientos" | "temporada" | "jornadas" | "duracionJornadaDias"
 > & {
   createdBy: Types.ObjectId;
   temporada: Types.ObjectId | null;
   enfrentamientos: Types.ObjectId[];
   equipos: Array<EquipoEnLiga>;
+  jornadas: Jornada[];
+  duracionJornadaDias: number | null;
 };
 export type LigaDoc = HydratedDocument<Liga>;
 

@@ -1,7 +1,5 @@
 import { TemporadaDTO } from "recreativos-air-core/temporada";
-
-const toFecha = (value: any): string | null =>
-  value ? new Date(value).toISOString().slice(0, 10) : null;
+import { toFechaISO as toFecha } from "@/utils/fecha";
 
 export const TemporadaAdapter = {
   toDTO(temporada: any): TemporadaDTO {

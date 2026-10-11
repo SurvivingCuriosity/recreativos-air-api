@@ -8,8 +8,7 @@ import { ApiError } from "../../utils/ApiError";
 import { LigaRepository } from "../liga/liga.repository";
 import { Temporada } from "./temporada.model";
 import { TemporadaRepository } from "./temporada.repository";
-
-const toFecha = (value?: string | null) => (value ? new Date(value) : null);
+import { toFechaDate as toFecha } from "@/utils/fecha";
 
 // Las ligas seleccionadas pasan a la temporada; las que estaban y ya no, quedan sin temporada
 const sincronizarLigas = async (

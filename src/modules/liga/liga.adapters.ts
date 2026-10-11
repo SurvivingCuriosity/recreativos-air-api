@@ -1,6 +1,12 @@
 import { EquipoAdapter } from "../equipo/equipo.adapters";
-import { LigaDTO, EquipoEnLigaDTO, ConfiguracionLigaDTO } from "recreativos-air-core/liga";
+import {
+  LigaDTO,
+  EquipoEnLigaDTO,
+  ConfiguracionLigaDTO,
+  JornadaDTO,
+} from "recreativos-air-core/liga";
 import { Types } from "mongoose";
+import { toFechaISO } from "@/utils/fecha";
 
 export const LigaAdapter = {
   toDTO(liga: any): LigaDTO {
@@ -19,6 +25,12 @@ export const LigaAdapter = {
       idaYVuelta: !!liga.configuracion?.idaYVuelta,
     };
 
+    const jornadas: JornadaDTO[] = (liga.jornadas || []).map((j: any) => ({
+      numero: j.numero,
+      fechaInicio: toFechaISO(j.fechaInicio),
+      fechaFin: toFechaISO(j.fechaFin),
+    }));
+
     return {
       id: liga._id.toString(),
       nombre: liga.nombre,
@@ -32,6 +44,8 @@ export const LigaAdapter = {
       equipos,
       createdBy: this.parseId(liga.createdBy),
       temporada: liga.temporada ? this.parseId(liga.temporada) : null,
+      jornadas,
+      duracionJornadaDias: liga.duracionJornadaDias ?? null,
     };
   },
 

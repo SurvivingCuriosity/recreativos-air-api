@@ -24,12 +24,17 @@ const EnfrentamientoSchema = new Schema(
     resultadoRechazadoPor: { type: Types.ObjectId, ref: "Equipo" },
     fecha: { type: Date, default: null, required: false },
     ubicacion: { type: String, default: "" },
+    jornada: { type: Number, default: null },
   },
   { timestamps: true }
 );
 
-export type Enfrentamiento = InferSchemaType<typeof EnfrentamientoSchema> & {
+export type Enfrentamiento = Omit<
+  InferSchemaType<typeof EnfrentamientoSchema>,
+  "fecha" | "jornada"
+> & {
   fecha: Date | null;
+  jornada: number | null;
 };
 export type EnfrentamientoDoc = HydratedDocument<Enfrentamiento>;
 

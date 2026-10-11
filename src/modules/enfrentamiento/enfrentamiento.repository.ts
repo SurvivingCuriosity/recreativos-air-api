@@ -15,6 +15,7 @@ type EnfrentamientoUpdate = Partial<EnfrentamientoDoc>;
 export const EnfrentamientoRepository = {
   async findByLiga(ligaId: string) {
     return EnfrentamientoModel.find({ liga: ligaId })
+      .sort({ jornada: 1, createdAt: 1 })
       .populate("equipoA")
       .populate("equipoB")
       .exec();

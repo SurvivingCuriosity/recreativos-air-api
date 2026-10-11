@@ -7,14 +7,19 @@ import { EquipoRepository } from "../equipo/equipo.repository";
 import { LigaClasificacionHelper } from "./liga.clasificacion";
 import { LigaRepository } from "./liga.repository";
 import {
+  ActualizarJornadaBody,
   ActualizarLigaBody,
+  CambiarEstadoLigaBody,
   CrearLigaBody,
   EstadoEquipoEnLiga,
   EstadoLiga,
   GetLigasQuery,
+  RecalcularJornadasBody,
   SIN_TEMPORADA,
 } from "recreativos-air-core/liga";
 import { TemporadaRepository } from "../temporada/temporada.repository";
+import { toFechaDate } from "@/utils/fecha";
+import { calcularFechasJornadas } from "./liga.jornadas";
 
 export const LigaService = {
   crearLiga: async (data: CrearLigaBody, adminId: ObjectIdLike) => {
@@ -156,7 +161,7 @@ export const LigaService = {
       : EstadoEquipoEnLiga.Rechazado;
     await liga.save();
 
-    await EnfrentamientoGenerator.generarParaNuevoEquipo(liga, equipoId);
+    await EnfrentamientoGenerator.sincronizar(liga);
 
     return liga;
   },
@@ -180,10 +185,6 @@ export const LigaService = {
     if (!equipoEnLiga)
       throw new ApiError(404, "El equipo no está inscrito en esta liga");
 
-    // 🗑️ Eliminar enfrentamientos relacionados con el equipo
-    await EnfrentamientoRepository.deleteByLigaAndEquipo(ligaId, equipoId);
-
-    // 🧹 Filtrar el equipo fuera de la liga
     liga.equipos = liga.equipos.filter((e) => {
       const id =
         e.equipo instanceof Types.ObjectId
@@ -194,19 +195,77 @@ export const LigaService = {
 
     await liga.save();
 
+    await EnfrentamientoRepository.deleteByLigaAndEquipo(ligaId, equipoId);
+    await EnfrentamientoGenerator.sincronizar(liga);
+
     return liga;
   },
 
-  cambiarEstado: async (ligaId: ObjectIdLike, nuevoEstado: EstadoLiga) => {
+  cambiarEstado: async (ligaId: ObjectIdLike, data: CambiarEstadoLigaBody) => {
     const liga = await LigaRepository.findById(ligaId);
     if (!liga) throw new ApiError(404, "Liga no encontrada");
 
-    liga.estadoLiga = nuevoEstado;
+    const arrancar =
+      data.nuevoEstado === EstadoLiga.EnCurso &&
+      liga.estadoLiga === EstadoLiga.SinEmpezar;
+
+    if (arrancar && (!data.fechaPrimeraJornada || !data.duracionJornadaDias))
+      throw new ApiError(400, "Indica la fecha de la primera jornada y su duración");
+
+    liga.estadoLiga = data.nuevoEstado;
     await liga.save();
 
-    if (nuevoEstado === EstadoLiga.EnCurso) {
-      await EnfrentamientoGenerator.generarAlArrancarLiga(liga);
+    if (arrancar) {
+      await EnfrentamientoGenerator.generarAlArrancarLiga(liga, {
+        fechaPrimeraJornada: data.fechaPrimeraJornada!,
+        duracionJornadaDias: data.duracionJornadaDias!,
+      });
+    } else {
+      await EnfrentamientoGenerator.sincronizar(liga);
     }
+
+    return liga;
+  },
+
+  actualizarJornada: async (
+    ligaId: ObjectIdLike,
+    numero: number,
+    data: ActualizarJornadaBody
+  ) => {
+    const liga = await LigaRepository.findById(ligaId);
+    if (!liga) throw new ApiError(404, "Liga no encontrada");
+
+    const jornada = liga.jornadas.find((j) => j.numero === numero);
+    if (!jornada) throw new ApiError(404, "Jornada no encontrada");
+
+    jornada.fechaInicio = toFechaDate(data.fechaInicio);
+    jornada.fechaFin = toFechaDate(data.fechaFin);
+    liga.markModified("jornadas");
+    await liga.save();
+
+    return liga;
+  },
+
+  // Si la liga no tiene calendario (anterior a las jornadas) genera el round-robin completo
+  recalcularJornadas: async (ligaId: ObjectIdLike, data: RecalcularJornadasBody) => {
+    const liga = await LigaRepository.findById(ligaId);
+    if (!liga) throw new ApiError(404, "Liga no encontrada");
+
+    if (liga.estadoLiga === EstadoLiga.SinEmpezar)
+      throw new ApiError(400, "La liga todavía no ha arrancado");
+
+    if (liga.jornadas.length === 0) {
+      await EnfrentamientoGenerator.generarAlArrancarLiga(liga, data);
+      return liga;
+    }
+
+    liga.jornadas = calcularFechasJornadas(
+      liga.jornadas.length,
+      data.fechaPrimeraJornada,
+      data.duracionJornadaDias
+    );
+    liga.duracionJornadaDias = data.duracionJornadaDias;
+    await liga.save();
 
     return liga;
   },

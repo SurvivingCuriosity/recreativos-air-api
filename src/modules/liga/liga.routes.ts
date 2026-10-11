@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  ActualizarJornadaSchema,
   ActualizarLigaParamsSchema,
   ActualizarLigaSchema,
   AprobarInscripcionParamsSchema,
@@ -14,7 +15,9 @@ import {
   GetLigasQuerySchema,
   InscribirEquipoParamsSchema,
   InscribirEquipoSchema,
+  JornadaNumeroParamsSchema,
   MarcarPagadoParamsSchema,
+  RecalcularJornadasSchema,
 } from "recreativos-air-core/liga";
 import { requireAdmin, requireAuth } from "../../middleware/auth";
 import { responseHandler } from "../../middleware/responseHandler";
@@ -82,6 +85,22 @@ router.patch(
   validateParams(CambiarEstadoLigaParamsSchema),
   validate(CambiarEstadoLigaSchema),
   responseHandler(LigaController.cambiarEstado)
+);
+
+router.patch(
+  "/:id/jornadas/:numero",
+  requireAdmin,
+  validateParams(JornadaNumeroParamsSchema),
+  validate(ActualizarJornadaSchema),
+  responseHandler(LigaController.actualizarJornada)
+);
+
+router.post(
+  "/:id/jornadas/recalcular",
+  requireAdmin,
+  validateParams(GetLigaParamsSchema),
+  validate(RecalcularJornadasSchema),
+  responseHandler(LigaController.recalcularJornadas)
 );
 
 router.patch(

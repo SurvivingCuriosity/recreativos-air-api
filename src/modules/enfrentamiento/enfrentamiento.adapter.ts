@@ -26,6 +26,7 @@ export const EnfrentamientoAdapter = {
       estado: enf.estado,
       fecha: enf.fecha ?? null,
       ubicacion: enf.ubicacion ?? "",
+      jornada: typeof enf.jornada === "number" ? enf.jornada : null,
       partidos,
       resultadoPropuestoPor: parseId(enf.resultadoPropuestoPor),
       resultadoAceptadoPor: parseId(enf.resultadoAceptadoPor),

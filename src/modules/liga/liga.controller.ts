@@ -2,6 +2,7 @@ import { LigaAdapter } from "./liga.adapters";
 import { ValidatedRequest } from "@/types/types";
 import { ok } from "@/utils/ApiResponse";
 import type {
+  ActualizarJornadaBody,
   ActualizarLigaBody,
   ActualizarLigaParams,
   AprobarInscripcionBody,
@@ -16,7 +17,9 @@ import type {
   GetLigasQuery,
   InscribirEquipoBody,
   InscribirEquipoParams,
+  JornadaNumeroParams,
   MarcarPagadoParams,
+  RecalcularJornadasBody,
 } from "recreativos-air-core/liga";
 import { LigaService } from "./liga.service";
 import { EquipoAdapter } from "../equipo/equipo.adapters";
@@ -83,11 +86,26 @@ export const LigaController = {
   cambiarEstado: async (
     req: ValidatedRequest<CambiarEstadoLigaParams, CambiarEstadoLigaBody>
   ) => {
-    const liga = await LigaService.cambiarEstado(
-      req.params.id,
-      req.validated.nuevoEstado
-    );
+    const liga = await LigaService.cambiarEstado(req.params.id, req.validated!);
     return ok(LigaAdapter.toDTO(liga), "Estado modificado");
+  },
+
+  actualizarJornada: async (
+    req: ValidatedRequest<JornadaNumeroParams, ActualizarJornadaBody>
+  ) => {
+    const liga = await LigaService.actualizarJornada(
+      req.params.id,
+      req.validatedParams!.numero,
+      req.validated!
+    );
+    return ok(LigaAdapter.toDTO(liga), "Jornada actualizada");
+  },
+
+  recalcularJornadas: async (
+    req: ValidatedRequest<GetLigaParams, RecalcularJornadasBody>
+  ) => {
+    const liga = await LigaService.recalcularJornadas(req.params.id, req.validated!);
+    return ok(LigaAdapter.toDTO(liga), "Fechas de jornadas recalculadas");
   },
 
   marcarPagado: async (req: ValidatedRequest<MarcarPagadoParams>) => {
